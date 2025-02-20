@@ -15,10 +15,8 @@ if __name__ == "__main__":
         "files/Moby Dick.txt",
         "files/Drakula.txt"
     ]
-    
     for file in files:
         dictionary.read_file(file)
-    
     dictionary.save_words_to_file("dictionary.txt")
     dictionary.save_to_binary_file("dictionary.dat")
 

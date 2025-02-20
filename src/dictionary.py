@@ -5,10 +5,6 @@ import pickle
 from src.word import Word
 from src.utils import detect_language
 
-nltk.download('punkt')
-nltk.download('wordnet')
-nltk.download('omw-1.4')
-
 class Dictionary:
     def __init__(self):
         self.dictionary = defaultdict(Word)
@@ -19,10 +15,8 @@ class Dictionary:
                 text = file.read()
                 language = detect_language(text)
                 print(f"Detected language of {file_name}: {language}")
-
-                # Лематизація і обробка тексту
-                if language == 'en':  # Лематизація тільки для англійської
-                    text = self.lemmatize_text(text)
+                if language == 'en':
+                     text = self.lemmatize_text(text)
 
                 for line in text.splitlines():
                     words = self._split_line(line)
@@ -34,7 +28,7 @@ class Dictionary:
             print(f"Error reading file: {e}")
 
     def lemmatize_text(self, text):
-        # Токенізуємо текст
+
         words = nltk.word_tokenize(text)
         lemmatized_words = [nltk.WordNetLemmatizer().lemmatize(word.lower()) for word in words]
         return ' '.join(lemmatized_words)
