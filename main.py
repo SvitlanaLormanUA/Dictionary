@@ -1,5 +1,6 @@
 import time
 import logging
+import string
 from src.dictionary import Dictionary
 from src.DS.incidence_matrix import IncidenceMatrix  
 from src.DS.inverted_index import InvertedIndex
@@ -14,15 +15,22 @@ def read_file_with_encoding(file_name):
             continue 
     raise ValueError(f"Unable to decode file {file_name} with tried encodings.")
 
+def clean_word(word):
+    word = word.replace("_", "") 
+    word = word.strip(string.punctuation) 
+    return word.lower() if word and not word.istitle() else word 
+
 def process_file(file_name, dictionary, incidence_matrix, inverted_index):
     try:
-        dictionary.read_file(file_name)  # Обробка тексту з лематизацією
+        dictionary.read_file(file_name) 
         text = read_file_with_encoding(file_name)
-        words = text.split()
+        
+        processed_text = dictionary.lemmatize_text(text)
+        words = processed_text.split()
 
         for word in words:
-            cleaned_word = word.replace("_", "").lower()
-            if cleaned_word and not any(char.isdigit() for char in cleaned_word): 
+            cleaned_word = clean_word(word)
+            if cleaned_word and not any(char.isdigit() for char in cleaned_word):
                 incidence_matrix.add_term_document(cleaned_word, file_name)
                 inverted_index.add_term_document(cleaned_word, file_name)
 
