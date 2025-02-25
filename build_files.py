@@ -1,6 +1,6 @@
-import time
 import logging
 import string
+import pickle
 from src.dictionary import Dictionary
 from src.DS.incidence_matrix import IncidenceMatrix  
 from src.DS.inverted_index import InvertedIndex
@@ -37,7 +37,7 @@ def process_file(file_name, dictionary, incidence_matrix, inverted_index):
     except Exception as e:
         logging.error(f"Error processing file {file_name}: {e}")
 
-def build_dictionary():
+def build_index():
     dictionary = Dictionary()
     files = [
         "files/01 - The Fellowship Of The Ring.txt",
@@ -61,25 +61,14 @@ def build_dictionary():
     dictionary.save_words_to_file("dictionary.txt")
     dictionary.save_to_binary_file("dictionary.dat")
 
-    loaded_dict = Dictionary.load_from_binary_file("dictionary.dat")
-    if loaded_dict:
-        loaded_dict.print_statistics()
+    # Збереження у файли
+    with open("incidence_matrix.pkl", "wb") as f:
+        pickle.dump(incidence_matrix, f)
 
-    query = "ring OR fellowship"
-    perform_boolean_search(query, incidence_matrix, inverted_index)
+    with open("inverted_index.pkl", "wb") as f:
+        pickle.dump(inverted_index, f)
 
-def perform_boolean_search(query, incidence_matrix, inverted_index):
-    print(f"\nBoolean Search Results for query: {query}")
-    
-    start_time = time.time()
-    result_incidence = incidence_matrix.boolean_search(query)
-    end_time = time.time()
-    print(f"Incidence Matrix Results: {result_incidence}. Search time: {end_time - start_time:.4f} seconds")
-    
-    start_time = time.time()
-    result_inverted = inverted_index.boolean_search(query)
-    end_time = time.time()
-    print(f"Inverted Index Results: {result_inverted}. Search time: {end_time - start_time:.4f} seconds")
+    print("Index building completed. Now we can search :_).")
 
 if __name__ == "__main__":
-    build_dictionary()
+    build_index()
