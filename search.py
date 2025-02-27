@@ -1,5 +1,4 @@
 import time
-
 from src.DS.incidence_matrix import IncidenceMatrix  
 from src.DS.inverted_index import InvertedIndex
 from src.DS.positional_inverted_index import PositionalInvertedIndex
@@ -35,9 +34,9 @@ def parse_positional_index(line, index_obj):
 
 def parse_biword_index(line, index_obj):
     biword, docs = line.strip().split(": ")
-    biword = tuple(biword.strip("()").split(", "))
+    biword = biword[1:-1].split()
     for doc in docs.split(", "):
-        index_obj.add_term_document(biword, doc)
+        index_obj.add_document(doc, " ".join(biword))
 
 def load_index():
     incidence_matrix = IncidenceMatrix()
@@ -68,7 +67,7 @@ def perform_boolean_search(query, incidence_matrix, inverted_index):
     end_time = time.time()
     print(f"Inverted Index Results: {result_inverted}. Search time: {end_time - start_time:.4f} seconds")
 
-def perform_phrase_search(query, positional_index):
+def perform_positional_index_search(query, positional_index):
     print(f"\nPhrase Search Results for query: {query}")
 
     start_time = time.time()
@@ -85,11 +84,15 @@ def perform_biword_search(query, biword_index):
     print(f"\nBiword Search Results for query: {query}")
 
     start_time = time.time()
-    result_biword = biword_index.phrase_search(query)
+    result_biword = biword_index.search_phrase(query)
     end_time = time.time()
-    print(f"Biword Search Results: {result_biword}. Search time: {end_time - start_time:.4f} seconds")
+    
+    if result_biword:
+        print(f"Biword Search Results: {result_biword}. Search time: {end_time - start_time:.4f} seconds")
+    else:
+        print(f"No documents found for query: {query}. Search time: {end_time - start_time:.4f} seconds")
 
-if __name__ == "__main__":
+def main():
     indices = load_index()
     if any(index is None for index in indices):
         print("Unable to load indices. Exiting...")
@@ -115,8 +118,12 @@ if __name__ == "__main__":
         if search_type == "1":
             perform_boolean_search(query, incidence_matrix, inverted_index)
         elif search_type == "2":
-            perform_phrase_search(query, positional_index)
+            perform_positional_index_search(query, positional_index)
         elif search_type == "3":
             perform_biword_search(query, biword_index)
         else:
             print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
+

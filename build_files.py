@@ -27,6 +27,7 @@ def process_file(file_name, dictionary, incidence_matrix, inverted_index, positi
         dictionary.read_file(file_name) 
         text = read_file_with_encoding(file_name)
         
+        text = text.translate(str.maketrans('', '', string.punctuation))
         processed_text = dictionary.lemmatize_text(text)
         words = processed_text.split()
 
@@ -37,12 +38,10 @@ def process_file(file_name, dictionary, incidence_matrix, inverted_index, positi
                 inverted_index.add_term_document(cleaned_word, file_name)
                 positional_index.add_term_document(cleaned_word, file_name, position)
         
-        # Додаємо документ до BiwordIndex
         biword_index.add_document(file_name, processed_text)
 
     except Exception as e:
         logging.error(f"Error processing file {file_name}: {e}")
-
 def build_index():
     dictionary = Dictionary()
     files = [
@@ -69,7 +68,6 @@ def build_index():
     dictionary.save_words_to_file("dictionary.txt")
     dictionary.save_to_binary_file("dictionary.dat")
 
-    # Збереження індексів у текстові файли
     with open("incidence_matrix.txt", "w") as f:
         for term, docs in incidence_matrix.index.items():
             f.write(f"{term}: {', '.join(docs)}\n")
@@ -84,10 +82,7 @@ def build_index():
             for doc, positions in doc_positions.items():
                 f.write(f"  {doc}: {', '.join(map(str, positions))}\n")
 
-    with open("biword_index.txt", "w") as f:
-        for biword, docs in biword_index.index.items():
-            f.write(f"{biword}: {', '.join(docs)}\n")
-
+    biword_index.save_to_file("biword_index.txt")
     print("Index building completed. Now we can search :_).")
 
 if __name__ == "__main__":

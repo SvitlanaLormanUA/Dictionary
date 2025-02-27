@@ -2,7 +2,6 @@ from collections import defaultdict
 from src.DS.base_ds import BaseIndex
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-import string
 import nltk
 
 nltk.download('punkt')
@@ -37,7 +36,7 @@ class PositionalInvertedIndex(BaseIndex):
         if not terms:
             return set()
         
-        # Знаходимо документи, де зустрічається перший термін
+    
         first_term = terms[0]
         documents = self.get_documents_for_term(first_term)
 
@@ -52,30 +51,25 @@ class PositionalInvertedIndex(BaseIndex):
                 if i == 0:
                     positions = term_positions
                 else:
-                    # Шукаємо позиції, де поточний термін йде відразу після попереднього
+                  
                     new_positions = []
                     for pos in term_positions:
                         if pos - 1 in positions:
                             new_positions.append(pos)
                     positions = new_positions
                     if not positions:
-                        break  # Якщо немає відповідних позицій, виходимо
+                        break 
             else:
-                # Якщо всі терміни знайдені у правильній послідовності, додаємо документ
                 result_docs.add(doc)
 
         return result_docs
 
     def phrase_search_with_distance(self, phrase, max_distance=2):
-        """
-        Шукає фразу в документах, враховуючи максимальну відстань між термінами.
-        Повертає множину документів, де фраза зустрічається з допустимою відстанню.
-        """
         terms = self.tokenize_and_clean(phrase)
         if not terms:
             return set()
         
-        # Знаходимо документи, де зустрічається перший термін
+
         first_term = terms[0]
         documents = self.get_documents_for_term(first_term)
 
@@ -85,12 +79,12 @@ class PositionalInvertedIndex(BaseIndex):
             for i, term in enumerate(terms):
                 term_positions = self.get_positions_for_term(term, doc)
                 if not term_positions:
-                    break  # Якщо термін не знайдено, виходимо
+                    break  
                 
                 if i == 0:
                     positions = term_positions
                 else:
-                    # Шукаємо позиції, де поточний термін знаходиться на відстані не більше max_distance
+                 
                     new_positions = []
                     for pos in term_positions:
                         for prev_pos in positions:
@@ -99,15 +93,12 @@ class PositionalInvertedIndex(BaseIndex):
                                 break
                     positions = new_positions
                     if not positions:
-                        break  # Якщо немає відповідних позицій, виходимо
+                        break  
             else:
-                # Якщо всі терміни знайдені з допустимою відстанню, додаємо документ
+              
                 result_docs.add(doc)
 
         return result_docs
 
     def get_positions_for_term(self, term, document):
-        """
-        Повертає список позицій терміна у вказаному документі.
-        """
         return self.positional_index.get(term, {}).get(document, [])
