@@ -1,9 +1,11 @@
+
 from collections import defaultdict
 import re
+import string
 
 class BaseIndex:
     def __init__(self):
-        self.index = defaultdict(set)  
+        self.index = defaultdict(set)
 
     def add_term_document(self, term, document):
         self.index[term].add(document)
@@ -39,7 +41,10 @@ class BaseIndex:
                     stack.append(docs)  
 
         return stack[0] if stack else set()
-
+    def clean_word(word):
+        word = word.replace("_", "") 
+        word = word.strip(string.punctuation) 
+        return word.lower() if word and not word.istitle() else word 
     def apply_operator(self, terms):
         result = terms[0]
         for i in range(1, len(terms), 2):
@@ -53,6 +58,6 @@ class BaseIndex:
                 result -= term
         return result
 
+
     def get_documents_for_term(self, term):
         return self.index.get(term, set())
-
