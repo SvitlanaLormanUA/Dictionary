@@ -75,10 +75,7 @@ def perform_positional_index_search(query, positional_index):
     end_time = time.time()
     print(f"Exact Phrase Search Results: {result_docs_exact}. Search time: {end_time - start_time:.4f} seconds")
 
-    start_time = time.time()
-    result_docs_distance = positional_index.phrase_search_with_distance(query, max_distance=2)
-    end_time = time.time()
-    print(f"Phrase Search with Distance Results: {result_docs_distance}. Search time: {end_time - start_time:.4f} seconds")
+    print("As was discussed on the lecture, realisation of phrase search with distance on positional index is impossible :)")
 
 def perform_biword_search(query, biword_index):
     print(f"\nBiword Search Results for query: {query}")
