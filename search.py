@@ -3,49 +3,7 @@ from src.DS.incidence_matrix import IncidenceMatrix
 from src.DS.inverted_index import InvertedIndex
 from src.DS.positional_inverted_index import PositionalInvertedIndex
 from src.DS.biword_index import BiwordIndex
-from src.DS.forward_tree import ForwardTree
-
-
-
-def parse_forward_tree(line, index_obj):
-    """Parse a line from forward_tree.txt and add to ForwardTree"""
-    stripped_line = line.strip()
-
-    if stripped_line == "Root":
-        return
-
-    if line.startswith("  "):
-        index_obj.current_term = stripped_line 
-    # else:
-    #     if hasattr(index_obj, "current_term") and index_obj.current_term:
-    #         index_obj.add_document(stripped_line, index_obj.current_term)
-        # else:
-        #     print(f"Warning: Orphaned document without a term - {stripped_line}")
-
-def load_forward_tree(filename):
-    """Load forward tree from file"""
-    forward_tree = ForwardTree()
-    try:
-        with open(filename, "r") as f:
-            for line in f:
-                parse_forward_tree(line, forward_tree)
-    except FileNotFoundError:
-        print(f"Error: {filename} not found.")
-        return None
-    return forward_tree
-
-def perform_forward_tree_search(query, forward_tree):
- 
-    print(f"\nForward Tree Search Results for query: {query}")
-    start_time = time.time()
-    result_forward = forward_tree.search(query)
-    end_time = time.time()
-
-    if result_forward:
-        print(f"Forward Tree Results: {result_forward}. Search time: {end_time - start_time:.4f} seconds")
-    else:
-        print(f"No documents found for query: {query}. Search time: {end_time - start_time:.4f} seconds")
-
+from src.DS.forward_tree import ForwardTree, TreeNode
 
 def load_index_from_file(filename, index_obj, parse_func):
     try:
@@ -56,6 +14,25 @@ def load_index_from_file(filename, index_obj, parse_func):
         print(f"Error: {filename} not found.")
         return False
     return True
+
+def parse_forward_tree(line, index_obj):
+    line = line.rstrip()  # Remove trailing whitespace/newlines
+    if line == "Root":
+        index_obj.root = TreeNode("Root")
+        index_obj.current_term_node = None  
+    elif line.startswith("  ") and not line.startswith("    "):
+        # Term level (2 spaces): Create a new TreeNode under Root
+        term = line.strip()
+        new_node = TreeNode(term)
+        index_obj.root.add_child(new_node)
+        index_obj.current_term_node = new_node  # Track the current term node
+    elif line.startswith("    "):
+        # Document level (4 spaces): Add document to the current term node
+        doc_path = line.strip()
+        if index_obj.current_term_node:
+            index_obj.current_term_node.add_child(TreeNode(doc_path))
+        else:
+            print(f"Error: Document '{doc_path}' found before any term.")
 
 def parse_incidence_matrix(line, index_obj):
     term, docs = line.strip().split(": ")
@@ -92,13 +69,25 @@ def load_index():
         load_index_from_file("incidence_matrix.txt", incidence_matrix, parse_incidence_matrix),
         load_index_from_file("inverted_index.txt", inverted_index, parse_inverted_index),
         load_index_from_file("positional_index.txt", positional_index, parse_positional_index),
-       load_index_from_file ("biword_index.txt", biword_index, parse_biword_index),
-        load_index_from_file("forward_tree.txt", forward_tree, parse_forward_tree)
-    
+        load_index_from_file("biword_index.txt", biword_index, parse_biword_index),
+        load_index_from_file("forward_tree.txt", forward_tree, parse_forward_tree),
     ]):
         return None, None, None, None
 
     return incidence_matrix, inverted_index, positional_index, biword_index, forward_tree
+
+
+def  perform_forward_tree_search(query, forward_tree):
+    print(f"\nForward Tree Search Results for query: {query}")
+
+    start_time = time.time()
+    result_forward = forward_tree.search(query)
+    end_time = time.time()
+    
+    if result_forward:
+        print(f"Forward Tree Search Results: {result_forward}. Search time: {end_time - start_time:.4f} seconds")
+    else:
+        print(f"No documents found for query: {query}. Search time: {end_time - start_time:.4f} seconds")
 
 def perform_boolean_search(query, incidence_matrix, inverted_index):
     print(f"\nBoolean Search Results for query: {query}")
@@ -172,4 +161,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
